@@ -214,7 +214,13 @@ const CalendarScreen = (props) => {
                </View>
             </View>
             <View style={{ flex: 1 }}>
-               <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+               <Text
+                  style={{
+                     fontSize: 20,
+                     fontWeight: "bold",
+                     color: colors.textPrimary,
+                  }}
+               >
                   Upcoming Events
                </Text>
                <Text

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, Text, TouchableOpacity, FlatList } from "react-native";
 import { SearchBar } from "react-native-elements";
 
-import colors from "../theme/color";
+import colors from "../../theme/color";
 
 const ChatContainer = (props) => {
    return (
@@ -14,6 +14,7 @@ const ChatContainer = (props) => {
             width: "100%",
             marginVertical: 15,
          }}
+         onPress={props.onPress}
       >
          <View
             style={{
@@ -53,7 +54,7 @@ const ChatContainer = (props) => {
    );
 };
 
-const chatScreen = (props) => {
+const index = (props) => {
    const [search, setSearch] = useState("");
    const chats = [
       {
@@ -182,6 +183,11 @@ const chatScreen = (props) => {
                      lastMessage={itemData.item.lastMessage}
                      timePassed={itemData.item.timePassed}
                      isLastMessaged={itemData.item.isLastMessaged}
+                     onPress={() =>
+                        props.navigation.navigate("chat", {
+                           name: itemData.item.name,
+                        })
+                     }
                   />
                );
             }}
@@ -206,4 +212,4 @@ const chatScreen = (props) => {
    );
 };
 
-export default chatScreen;
+export default index;

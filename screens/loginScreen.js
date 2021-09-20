@@ -1,11 +1,71 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { StackActions } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import colors from "../theme/color";
+import { AUTH_API_URL } from "../keys";
 
 const LoginScreen = (props) => {
    const [isPassVisible, setIsPassVisible] = useState(false);
+   const [email, setEmail] = useState("");
+   const [password, setPassword] = useState("");
+   const [loading, setLoading] = useState(false);
+   // console.log(props.props);
+   const sendLoginData = async () => {
+      try {
+         const response = await fetch(`${AUTH_API_URL}/login`, {
+            method: "POST",
+            headers: {
+               "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+               email,
+               password,
+            }),
+         });
+         const data = await response.json();
+         console.log(data.token != "");
+         if (
+            data.non_field_errors &&
+            data.non_field_errors[0] == "Incorrect Credentials"
+         ) {
+            Alert.alert("Error", "Incorrect email or password");
+            return setLoading(false);
+         } else if (data.token != "") {
+            console.log(data.token);
+            AsyncStorage.setItem("token", data.token);
+            if (data.user.is_teacher) {
+               return props.navigation.dispatch(
+                  StackActions.replace("Drawer", {})
+               );
+            } else {
+               Alert.alert("Error", "This is not a teacher account");
+               return setLoading(false);
+            }
+         } else {
+            Alert.alert("Error", "Something went wrong!");
+            return setLoading(false);
+         }
+      } catch (err) {
+         console.log(err.message);
+         if (err.message == "Network request failed") {
+            Alert.alert("Error", "Check your network!");
+         }
+      }
+      setLoading(false);
+   };
+
+   const loginHandler = async () => {
+      setLoading(true);
+      if (!email || !password || email == "" || password == "") {
+         Alert.alert("Error", "Email or Password is empty.");
+         setLoading(false);
+      } else {
+         await sendLoginData();
+      }
+   };
 
    return (
       <View
@@ -15,7 +75,6 @@ const LoginScreen = (props) => {
             alignItems: "center",
             paddingHorizontal: 40,
             justifyContent: "center",
-            paddingTop: "10%",
          }}
       >
          <View
@@ -47,6 +106,7 @@ const LoginScreen = (props) => {
                         paddingHorizontal: 10,
                         marginVertical: 8,
                      }}
+                     onChangeText={(val) => setEmail(val)}
                   />
                </View>
                <View
@@ -68,6 +128,7 @@ const LoginScreen = (props) => {
                      }}
                      textContentType="password"
                      secureTextEntry={!isPassVisible}
+                     onChangeText={(val) => setPassword(val)}
                   />
                   <TouchableOpacity
                      style={{
@@ -92,24 +153,29 @@ const LoginScreen = (props) => {
                   </Text>
                </TouchableOpacity>
             </View>
-            <View
+            <TouchableOpacity
                style={{
-                  backgroundColor: colors.textPrimary,
+                  backgroundColor: loading
+                     ? colors.textSecondary
+                     : colors.textPrimary,
                   paddingVertical: 12,
                   width: 120,
                   alignItems: "center",
                   borderRadius: 100,
                   marginTop: 30,
                }}
+               activeOpacity={0.6}
+               onPress={loginHandler}
+               disabled={loading}
             >
                <Text
                   style={{ color: "white", fontSize: 16, fontWeight: "bold" }}
                >
                   SIGN IN
                </Text>
-            </View>
+            </TouchableOpacity>
          </View>
-         <View style={{ marginVertical: 20, flexDirection: "row" }}>
+         {/* <View style={{ marginVertical: 20, flexDirection: "row" }}>
             <Text style={{ color: colors.textSecondary, fontSize: 16 }}>
                Don't have an account?{" "}
             </Text>
@@ -124,7 +190,7 @@ const LoginScreen = (props) => {
                   Sign Up
                </Text>
             </TouchableOpacity>
-         </View>
+         </View> */}
       </View>
    );
 };

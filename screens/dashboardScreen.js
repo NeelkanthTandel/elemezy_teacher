@@ -98,7 +98,7 @@ const dashboardScreen = (props) => {
                <View>
                   <Text
                      style={{
-                        fontSize: 16,
+                        fontSize: 18,
                         fontWeight: "700",
                         color: colors.textPrimary,
                      }}

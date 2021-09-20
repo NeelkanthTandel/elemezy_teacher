@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Elemexy_Teacher",
-    "slug": "Elemexy_Teacher",
+    "name": "ELEMEZY_Teacher",
+    "slug": "elemezy_teacher",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -27,6 +27,7 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "description": ""
   }
 }

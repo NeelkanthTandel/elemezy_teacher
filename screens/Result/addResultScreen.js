@@ -1,16 +1,17 @@
 import React, { useState } from "react";
 import {
-   StyleSheet,
    View,
    ScrollView,
    Text,
    TouchableOpacity,
    TextInput,
+   FlatList,
+   Alert,
 } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import { Picker } from "@react-native-picker/picker";
 import * as DocumentPicker from "expo-document-picker";
+import { MaterialIcons } from "@expo/vector-icons";
+import { Picker } from "@react-native-picker/picker";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 import colors from "../../theme/color";
 import DatePickerButton from "../../components/DatePickerButton";
@@ -21,7 +22,12 @@ const addResultScreen = (props) => {
    const [show, setShow] = useState(false);
    const [classroom, setClassroom] = useState("");
    const [subject, setSubject] = useState("");
+   const [result, setResult] = useState([]);
+   const [name, setName] = useState("");
+   const [marks, setMarks] = useState("");
+   const [markOutOf, setMarkOutOf] = useState("");
 
+   console.log(result);
    const formatedDate =
       (date.getDate() < 10 ? "0" + date.getDate() : date.getDate()) +
       "-" +
@@ -41,6 +47,48 @@ const addResultScreen = (props) => {
       setShow(true);
       setMode(currentMode);
    };
+
+   const validateMarks = (mark) => {
+      const re = /^[0-9]+$/;
+      const i = parseInt(mark);
+      console.log(i);
+      if (!markOutOf || markOutOf == "") {
+         if (re.test(mark) && i >= 0 && i <= 100) {
+            return true;
+         } else {
+            return false;
+         }
+      } else {
+         if (re.test(mark) && i >= 0 && i <= parseInt(markOutOf)) {
+            return true;
+         } else {
+            return false;
+         }
+      }
+   };
+
+   const addResultHandler = () => {
+      if (!name || !marks || name == "" || marks == "") {
+         return Alert.alert("Error", "Field cannot be empty.");
+      } else if (!validateMarks(marks)) {
+         return Alert.alert(
+            "Error",
+            `Enter marks properly.\n${
+               !markOutOf
+                  ? "To enter marks more than 100, enter Marks (Out Of)."
+                  : ""
+            }`
+         );
+      }
+      setResult((data) =>
+         data
+            ? [...data, { stuName: name, markObt: marks }]
+            : [{ stuName: name, markObt: marks }]
+      );
+      setMarks("");
+      setName("");
+   };
+
    return (
       <ScrollView
          style={{ backgroundColor: colors.backgroundColor }}
@@ -83,7 +131,7 @@ const addResultScreen = (props) => {
                      textAlign: "center",
                   }}
                >
-                  Exam
+                  Result
                </Text>
                <MaterialIcons
                   name="keyboard-arrow-left"
@@ -91,6 +139,7 @@ const addResultScreen = (props) => {
                   color={colors.backgroundColor}
                />
             </View>
+
             <View
                style={{
                   alignItems: "flex-start",
@@ -98,12 +147,12 @@ const addResultScreen = (props) => {
             >
                <Text
                   style={{
-                     fontSize: 18,
+                     fontSize: 20,
                      fontWeight: "bold",
                      color: colors.textPrimary,
                   }}
                >
-                  Select Classroom and Subject
+                  Enter Result Manually
                </Text>
                <View
                   style={{
@@ -120,7 +169,7 @@ const addResultScreen = (props) => {
                         paddingVertical: 2,
                         flex: 1,
                         borderRadius: 5,
-                        marginRight: 10,
+                        marginRight: 15,
                      }}
                   >
                      <Picker
@@ -148,7 +197,6 @@ const addResultScreen = (props) => {
                         paddingVertical: 2,
                         borderRadius: 5,
                         flex: 1,
-                        marginRight: 10,
                      }}
                   >
                      <Picker
@@ -164,18 +212,120 @@ const addResultScreen = (props) => {
                         dropdownIconColor="grey"
                      >
                         <Picker.Item label="Subject" value="Subject" />
-                        <Picker.Item label="English" value="English" />
-                        <Picker.Item label="Maths" value="Maths" />
-                        <Picker.Item label="Hindi" value="Hindi" />
-                        <Picker.Item label="Science" value="Science" />
                      </Picker>
                   </View>
+               </View>
+               <View
+                  style={{
+                     width: "100%",
+                     flexDirection: "row",
+                     justifyContent: "space-between",
+                     marginTop: 15,
+                  }}
+               >
+                  <View
+                     style={{
+                        borderWidth: 0.5,
+                        borderColor: colors.textSecondary,
+                        paddingVertical: 2,
+                        flex: 1,
+                        borderRadius: 5,
+                        marginRight: 15,
+                     }}
+                  >
+                     <Picker
+                        selectedValue={classroom}
+                        onValueChange={(itemValue, itemIndex) =>
+                           setClassroom(itemValue)
+                        }
+                        style={{
+                           color: colors.textPrimary,
+                           flex: 1,
+                           width: "100%",
+                           marginRight: -10,
+                        }}
+                        dropdownIconColor="grey"
+                     >
+                        <Picker.Item label="Exam" value="Exam" />
+                        <Picker.Item label="9A" value="9A" />
+                        <Picker.Item label="9B" value="9B" />
+                     </Picker>
+                  </View>
+                  <TextInput
+                     placeholder="Mark (Out Of)"
+                     style={{
+                        flex: 1,
+                        marginRight: 15,
+                        borderWidth: 0.5,
+                        paddingVertical: 0,
+                        paddingHorizontal: 10,
+                        borderRadius: 5,
+                        borderColor: colors.textSecondary,
+                        color: colors.textPrimary,
+                     }}
+                     value={markOutOf}
+                     onChangeText={(val) => setMarkOutOf(val)}
+                  />
+
                   <DatePickerButton
                      date={formatedDate}
                      onPress={() => showMode("date")}
                   />
                </View>
-
+               <View
+                  style={{
+                     width: "100%",
+                     flexDirection: "row",
+                     justifyContent: "space-between",
+                     marginTop: 30,
+                  }}
+               >
+                  <TextInput
+                     placeholder="Student Name"
+                     style={{
+                        flex: 1,
+                        marginRight: 15,
+                        borderWidth: 0.5,
+                        paddingVertical: 4,
+                        paddingHorizontal: 10,
+                        borderRadius: 5,
+                        borderColor: colors.textSecondary,
+                        color: colors.textPrimary,
+                     }}
+                     value={name}
+                     onChangeText={(val) => setName(val)}
+                  />
+                  <TextInput
+                     placeholder="Marks Obtained"
+                     style={{
+                        flex: 1,
+                        marginRight: 15,
+                        borderWidth: 0.5,
+                        paddingVertical: 4,
+                        paddingHorizontal: 10,
+                        borderRadius: 5,
+                        borderColor: colors.textSecondary,
+                        color: colors.textPrimary,
+                     }}
+                     value={marks}
+                     onChangeText={(val) => setMarks(val)}
+                  />
+                  <TouchableOpacity
+                     style={{
+                        paddingHorizontal: 10,
+                        paddingVertical: 5,
+                        backgroundColor: "#3283c9",
+                        borderRadius: 5,
+                        justifyContent: "center",
+                        alignItems: "center",
+                     }}
+                     onPress={addResultHandler}
+                  >
+                     <Text style={{ color: "white", fontWeight: "bold" }}>
+                        ADD
+                     </Text>
+                  </TouchableOpacity>
+               </View>
                {show && (
                   <DateTimePicker
                      testID="dateTimePicker"
@@ -187,7 +337,97 @@ const addResultScreen = (props) => {
                   />
                )}
             </View>
-            <View style={{ flex: 1, width: "100%", marginTop: 30 }}>
+            {console.log("re:", result)}
+            {!result || result == [] || result == "" ? null : (
+               <View
+                  style={{
+                     marginTop: 30,
+                  }}
+               >
+                  <Text
+                     style={{
+                        fontSize: 16,
+                        fontWeight: "bold",
+                        color: colors.textPrimary,
+                     }}
+                  >
+                     Added results
+                  </Text>
+                  <View
+                     style={{
+                        flexDirection: "row",
+                        width: "100%",
+                        marginTop: 15,
+                     }}
+                  >
+                     <Text style={{ flex: 1, fontWeight: "bold" }}>Name</Text>
+                     <Text
+                        style={{
+                           width: "15%",
+                           minWidth: 40,
+                           fontWeight: "bold",
+                        }}
+                     >
+                        Marks
+                     </Text>
+                  </View>
+                  {result.map((data) => (
+                     <View
+                        style={{
+                           flexDirection: "row",
+                           width: "100%",
+                           marginTop: 10,
+                        }}
+                        key={result.indexOf(data)}
+                     >
+                        <Text style={{ flex: 1 }}>{data.stuName}</Text>
+                        <Text style={{ width: "15%", minWidth: 40 }}>
+                           {data.markObt}
+                        </Text>
+                     </View>
+                  ))}
+                  <View
+                     style={{
+                        paddingVertical: 10,
+                        width: "100%",
+                        backgroundColor: "#3283c9",
+                        alignItems: "center",
+                        marginVertical: 30,
+                        borderRadius: 5,
+                     }}
+                  >
+                     <Text
+                        style={{
+                           color: "white",
+                           fontSize: 16,
+                           fontWeight: "bold",
+                        }}
+                     >
+                        Upload added result
+                     </Text>
+                  </View>
+               </View>
+            )}
+
+            <Text
+               style={{
+                  fontWeight: "bold",
+                  color: colors.textSecondary,
+                  textAlign: "center",
+                  marginTop: 15,
+               }}
+            >
+               OR
+            </Text>
+            <View
+               style={{
+                  width: "100%",
+                  marginTop: 15,
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+               }}
+            >
                <TouchableOpacity
                   activeOpacity={0.6}
                   onPress={() => {
@@ -196,8 +436,6 @@ const addResultScreen = (props) => {
                      }).then((data) => console.log(data));
                   }}
                   style={{
-                     width: "100%",
-                     marginBottom: 15,
                      flexDirection: "row",
                      alignItems: "center",
                   }}
@@ -209,16 +447,20 @@ const addResultScreen = (props) => {
                      style={{ marginLeft: 15 }}
                   />
                </TouchableOpacity>
-               <Text
+               <TouchableOpacity
                   style={{
-                     fontSize: 20,
-                     fontWeight: "bold",
-                     color: colors.textPrimary,
-                     marginVertical: 10,
+                     paddingHorizontal: 10,
+                     paddingVertical: 5,
+                     backgroundColor: "#3283c9",
+                     borderRadius: 5,
+                     justifyContent: "center",
+                     alignItems: "center",
                   }}
                >
-                  Upload Documents
-               </Text>
+                  <Text style={{ color: "white", fontWeight: "bold" }}>
+                     UPLOAD DOC
+                  </Text>
+               </TouchableOpacity>
             </View>
          </View>
       </ScrollView>

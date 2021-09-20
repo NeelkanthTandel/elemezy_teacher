@@ -87,11 +87,12 @@ const index = (props) => {
             >
                <TabContainer
                   title="ADD NEW EXAM"
-                  onPress={() => props.navigation.navigate("newExam")}
+                  onPress={() => props.navigation.navigate("addResult")}
                />
                <TabContainer
-                  title="VIEW UPCOMING"
-                  onPress={() => props.navigation.navigate("viewExam")}
+                  title="VIEW RESULT"
+                  onPress={() => props.navigation.navigate("viewResult")}
+                  view
                />
             </View>
          </View>

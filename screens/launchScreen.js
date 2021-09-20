@@ -13,7 +13,12 @@ const launchScreen = (props) => {
       setIsLogin(!isLogin);
    };
 
-   return <RenderScreen onPress={switchScreenHandler} />;
+   return (
+      <RenderScreen
+         onPress={switchScreenHandler}
+         navigation={props.navigation}
+      />
+   );
 };
 
 export default launchScreen;

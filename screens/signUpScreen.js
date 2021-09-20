@@ -5,27 +5,37 @@ import {
    TextInput,
    TouchableOpacity,
    ScrollView,
+   Alert,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
+import { StackActions } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import colors from "../theme/color";
+import { AUTH_API_URL } from "../keys";
 
 const SignUpScreen = (props) => {
+   const [loading, setLoading] = useState(false);
    const [isEmail, setIsEmail] = useState(true);
    const [date, setDate] = useState(new Date());
    const [mode, setMode] = useState(null);
    const [show, setShow] = useState(false);
    const [isPassVisible, setIsPassVisible] = useState(false);
+   const [email, setEmail] = useState("");
+   const [password, setPassword] = useState("");
+   const [firstName, setFirstName] = useState("");
+   const [lastName, setLastName] = useState("");
+   const [phone, setPhone] = useState("");
 
-   const formatedDate =
-      (date.getDate() < 10 ? "0" + date.getDate() : date.getDate()) +
+   const birthDate =
+      date.getFullYear() +
       "-" +
       (date.getMonth() < 10
          ? "0" + (date.getMonth() + 1)
          : date.getMonth() + 1) +
       "-" +
-      date.getFullYear();
+      (date.getDate() < 10 ? "0" + date.getDate() : date.getDate());
 
    const onChange = (event, selectedDate) => {
       const currentDate = selectedDate || date;
@@ -36,6 +46,95 @@ const SignUpScreen = (props) => {
    const showMode = (currentMode) => {
       setShow(true);
       setMode(currentMode);
+   };
+
+   const validateEmail = (email) => {
+      const re =
+         /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      return re.test(email);
+   };
+
+   const validatePassword = (password) => {
+      const re = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+      return re.test(password);
+   };
+
+   const validatePhone = (phone) => {
+      const re = /^[1-9]\d{9}$/;
+      return re.test(phone);
+   };
+
+   const registerHandler = async () => {
+      setLoading(true);
+      if (
+         !email ||
+         !password ||
+         !firstName ||
+         !lastName ||
+         !mode ||
+         !phone ||
+         email == "" ||
+         password == "" ||
+         firstName == "" ||
+         lastName == "" ||
+         phone == ""
+      ) {
+         Alert.alert("Error", "Something is missing!!");
+      } else if (!validatePhone(phone)) {
+         Alert.alert("Error", "Please enter valid phone number.");
+      } else if (!validateEmail(email)) {
+         Alert.alert("Error", "Please enter valid email.");
+      } else if (!validatePassword(password)) {
+         Alert.alert(
+            "Error",
+            "Password does not meet following requirements:\nMinimum of eight characters\nAt least one letter and one number."
+         );
+      } else {
+         return await sendRegisterData();
+      }
+      setLoading(false);
+   };
+
+   const sendRegisterData = async () => {
+      console.log(birthDate);
+      try {
+         const response = await fetch(`${AUTH_API_URL}/register`, {
+            method: "POST",
+            headers: {
+               "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+               firstname: firstName,
+               lastname: lastName,
+               email,
+               password,
+               birthdate: birthDate,
+               phone_number: phone,
+               is_manager: true,
+               is_student: false,
+               is_teacher: true,
+            }),
+         });
+         const data = await response.json();
+         console.log(data);
+         if (data.token) {
+            console.log(data);
+            AsyncStorage.setItem("token", data.token);
+            return props.navigation.dispatch(StackActions.replace("Drawer"));
+         } else if (data.email[0]) {
+            Alert.alert("Error", data.email[0]);
+            return setLoading(false);
+         } else {
+            console.log(data);
+            return setLoading(false);
+         }
+      } catch (err) {
+         console.log(err);
+         if (err.message == "Network request failed") {
+            Alert.alert("Error", "Check your network!");
+         }
+      }
+      setLoading(false);
    };
 
    return (
@@ -90,6 +189,7 @@ const SignUpScreen = (props) => {
                            paddingHorizontal: 10,
                         }}
                         textContentType="name"
+                        onChangeText={(val) => setFirstName(val)}
                      />
                      <TextInput
                         placeholder="Last Name"
@@ -100,6 +200,7 @@ const SignUpScreen = (props) => {
                            paddingHorizontal: 10,
                         }}
                         textContentType="familyName"
+                        onChangeText={(val) => setLastName(val)}
                      />
                   </View>
                   <TouchableOpacity
@@ -118,7 +219,7 @@ const SignUpScreen = (props) => {
                            color: !mode ? colors.textSecondary : "black",
                         }}
                      >
-                        {!mode ? "Birthdate" : formatedDate}
+                        {!mode ? "Birthdate" : birthDate}
                      </Text>
                      {show && (
                         <DateTimePicker
@@ -134,6 +235,20 @@ const SignUpScreen = (props) => {
                   </TouchableOpacity>
 
                   <TextInput
+                     placeholder="Phone"
+                     style={{
+                        backgroundColor: "#ddd",
+                        paddingVertical: 8,
+                        width: "100%",
+                        paddingHorizontal: 10,
+                        marginVertical: 8,
+                     }}
+                     textContentType="telephoneNumber"
+                     keyboardType="phone-pad"
+                     onChangeText={(val) => setPhone(val)}
+                  />
+
+                  <TextInput
                      placeholder={isEmail ? "Email" : "Phone"}
                      style={{
                         backgroundColor: "#ddd",
@@ -144,6 +259,7 @@ const SignUpScreen = (props) => {
                      }}
                      textContentType="emailAddress"
                      keyboardType="email-address"
+                     onChangeText={(val) => setEmail(val)}
                   />
 
                   <View
@@ -169,6 +285,7 @@ const SignUpScreen = (props) => {
                            }}
                            textContentType="newPassword"
                            secureTextEntry={!isPassVisible}
+                           onChangeText={(val) => setPassword(val)}
                         />
                         <TouchableOpacity
                            style={{
@@ -185,18 +302,7 @@ const SignUpScreen = (props) => {
                            />
                         </TouchableOpacity>
                      </View>
-                     {/* <TextInput
-                        placeholder="Password"
-                        style={{
-                           backgroundColor: "#ddd",
-                           paddingVertical: 8,
-                           width: "100%",
-                           paddingHorizontal: 10,
-                        }}
-                        textContentType="newPassword"
-                        secureTextEntry={true}
-                     /> */}
-                     <TouchableOpacity
+                     {/* <TouchableOpacity
                         onPress={() => setIsEmail(!isEmail)}
                         activeOpacity={0.6}
                         style={{ alignSelf: "center", marginTop: 10 }}
@@ -204,18 +310,23 @@ const SignUpScreen = (props) => {
                         <Text style={{ color: colors.textSecondary }}>
                            Sign Up using {isEmail ? "mobile number" : "email"}
                         </Text>
-                     </TouchableOpacity>
+                     </TouchableOpacity> */}
                   </View>
                </View>
-               <View
+               <TouchableOpacity
                   style={{
-                     backgroundColor: colors.textPrimary,
+                     backgroundColor: loading
+                        ? colors.textSecondary
+                        : colors.textPrimary,
                      paddingVertical: 12,
                      width: 120,
                      alignItems: "center",
                      borderRadius: 100,
                      marginTop: 30,
                   }}
+                  activeOpacity={0.6}
+                  onPress={registerHandler}
+                  disabled={loading}
                >
                   <Text
                      style={{
@@ -224,9 +335,9 @@ const SignUpScreen = (props) => {
                         fontWeight: "bold",
                      }}
                   >
-                     SIGN IN
+                     SIGN UP
                   </Text>
-               </View>
+               </TouchableOpacity>
             </View>
             <View style={{ marginVertical: 20, flexDirection: "row" }}>
                <Text style={{ color: colors.textSecondary, fontSize: 16 }}>

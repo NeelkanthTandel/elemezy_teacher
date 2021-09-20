@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { Text, View } from "react-native";
 import { StatusBar, TouchableOpacity } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, StackActions } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
    createDrawerNavigator,
    DrawerContentScrollView,
@@ -17,6 +19,7 @@ import {
    Octicons,
 } from "@expo/vector-icons";
 
+import { AUTH_API_URL } from "../keys";
 import colors from "../theme/color";
 import classes from "../screens/classesScreen";
 import dashboardScreen from "../screens/dashboardScreen";
@@ -24,7 +27,7 @@ import calendarScreen from "../screens/calendarsScreen";
 import leaveRequestsScreen from "../screens/leaveRequestsScreen";
 import classesScreen from "../screens/classesScreen";
 import supportScreen from "../screens/supportScreen";
-import chatScreen from "../screens/chatScreen";
+import chatHomeScreen from "../screens/chat";
 import profileScreen from "../screens/profileScreen";
 import notesScreen from "../screens/notesScreen";
 import assignmentScreen from "../screens/assignmentScreen";
@@ -37,7 +40,16 @@ import rankingHomeScreen from "../screens/Ranking";
 import viewRankingScreen from "../screens/Ranking/viewRankingScreen";
 import resultHomeScreen from "../screens/Result";
 import addResultScreen from "../screens/Result/addResultScreen";
-import launchScreen from "../screens/launchScreen";
+import LoginScreen from "../screens/loginScreen";
+import viewResultScreen from "../screens/Result/viewResultScreen";
+import studentResult from "../screens/Result/studentResultScreen";
+import chatScreen from "../screens/chat/chatScreen";
+import meetingHomeScreen from "../screens/Meeting";
+import newMeetingScreen from "../screens/Meeting/newMeetingScreen";
+import viewMeetingScreen from "../screens/Meeting/viewMeetingScreen";
+import attendanceHomeScreen from "../screens/Attendance";
+import addAttendanceScreen from "../screens/Attendance/addAttendance";
+import viewAttendanceScreen from "../screens/Attendance/viewAttendance";
 
 const Stack = createNativeStackNavigator();
 
@@ -82,8 +94,45 @@ const resultStack = () => {
       <Stack.Navigator
          screenOptions={{ headerShown: false, animation: "slide_from_right" }}
       >
-         <Stack.Screen name="addResult" component={addResultScreen} />
          <Stack.Screen name="home" component={resultHomeScreen} />
+         <Stack.Screen name="addResult" component={addResultScreen} />
+         <Stack.Screen name="viewResult" component={viewResultScreen} />
+         <Stack.Screen name="studentResult" component={studentResult} />
+      </Stack.Navigator>
+   );
+};
+
+const meetingStack = () => {
+   return (
+      <Stack.Navigator
+         screenOptions={{ headerShown: false, animation: "slide_from_right" }}
+      >
+         <Stack.Screen name="home" component={meetingHomeScreen} />
+         <Stack.Screen name="newMeeting" component={newMeetingScreen} />
+         <Stack.Screen name="viewMeeting" component={viewMeetingScreen} />
+      </Stack.Navigator>
+   );
+};
+
+const attendanceStack = () => {
+   return (
+      <Stack.Navigator
+         screenOptions={{ headerShown: false, animation: "slide_from_right" }}
+      >
+         <Stack.Screen name="home" component={attendanceHomeScreen} />
+         <Stack.Screen name="addAttendance" component={addAttendanceScreen} />
+         <Stack.Screen name="viewAttendance" component={viewAttendanceScreen} />
+      </Stack.Navigator>
+   );
+};
+
+const chatStack = () => {
+   return (
+      <Stack.Navigator
+         screenOptions={{ headerShown: false, animation: "slide_from_right" }}
+      >
+         <Stack.Screen name="home" component={chatHomeScreen} />
+         <Stack.Screen name="chat" component={chatScreen} />
       </Stack.Navigator>
    );
 };
@@ -91,7 +140,27 @@ const resultStack = () => {
 const Drawer = createDrawerNavigator();
 
 const DrawerStack = (props) => {
+   const [loading, setLoading] = useState(false);
    let toggleDrawer;
+
+   const logoutHandler = async () => {
+      const token = await AsyncStorage.getItem("token");
+      try {
+         const response = await fetch(`${AUTH_API_URL}/logout`, {
+            method: "POST",
+            headers: {
+               "Content-Type": "application/json",
+               Authorization: "Token " + token,
+            },
+         });
+         // const data = await response.json();
+         console.log("logout");
+         await AsyncStorage.removeItem("token");
+         props.navigation.dispatch(StackActions.replace("Launch"));
+      } catch (err) {
+         console.log(err);
+      }
+   };
 
    return (
       <Drawer.Navigator
@@ -150,18 +219,35 @@ const DrawerStack = (props) => {
             return (
                <DrawerContentScrollView {...props}>
                   <DrawerItemList {...props} />
+                  <DrawerItem
+                     label={() => (
+                        <View
+                           style={{
+                              flexDirection: "row",
+                              alignItems: "center",
+                           }}
+                        >
+                           <Ionicons
+                              name="log-out"
+                              size={23}
+                              color={colors.headerTitle}
+                           />
+                           <Text
+                              style={{
+                                 color: colors.headerTitle,
+                                 marginLeft: 30,
+                              }}
+                           >
+                              Log Out
+                           </Text>
+                        </View>
+                     )}
+                     onPress={logoutHandler}
+                  />
                </DrawerContentScrollView>
             );
          }}
       >
-         <Drawer.Screen
-            name="Launch"
-            component={launchScreen}
-            options={{
-               headerShown: false,
-               swipeEnabled: false,
-            }}
-         />
          <Drawer.Screen
             name="Dashboard"
             component={dashboardScreen}
@@ -211,6 +297,8 @@ const DrawerStack = (props) => {
             name="Exams"
             component={examStack}
             options={{
+               drawerLabel: "Exams",
+               title: "",
                drawerIcon: () => (
                   <MaterialCommunityIcons
                      name="clipboard-list"
@@ -252,7 +340,7 @@ const DrawerStack = (props) => {
          />
          <Drawer.Screen
             name="Meeting"
-            component={classes}
+            component={meetingStack}
             options={{
                drawerIcon: () => (
                   <FontAwesome
@@ -265,7 +353,7 @@ const DrawerStack = (props) => {
          />
          <Drawer.Screen
             name="Attendance"
-            component={leaveRequestsScreen}
+            component={attendanceStack}
             options={{
                drawerLabel: "Attendance",
                title: "",
@@ -280,7 +368,7 @@ const DrawerStack = (props) => {
          />
          <Drawer.Screen
             name="Chat"
-            component={chatScreen}
+            component={chatStack}
             options={{
                drawerLabel: "Chat",
                title: "",
@@ -308,63 +396,131 @@ const DrawerStack = (props) => {
                ),
             }}
          />
-         <Drawer.Screen
-            name="Log Out"
-            component={classes}
-            options={{
-               drawerIcon: () => (
-                  <Ionicons
-                     name="log-out"
-                     size={23}
-                     color={colors.headerTitle}
-                  />
-               ),
-            }}
-         />
       </Drawer.Navigator>
    );
 };
 
 export default function MainNavigator(Props) {
+   const [isLoggedIn, setIsLoggedIn] = useState(null);
+   const [data, setData] = useState({});
+   const checkIfLoggedIn = async () => {
+      const token = await AsyncStorage.getItem("token");
+      console.log("token: ", token);
+      if (!token || token == "") {
+         console.log("No token => In main navigator");
+         return setIsLoggedIn(false);
+      } else {
+         try {
+            const response = await fetch(`${AUTH_API_URL}/user`, {
+               method: "GET",
+               headers: {
+                  "Content-Type": "application/json",
+                  Authorization: "Token " + token,
+               },
+            });
+            const data = await response.json();
+            console.log(data);
+            if (data.email) {
+               setData(data);
+               setIsLoggedIn(true);
+            } else {
+               setIsLoggedIn(false);
+            }
+         } catch (err) {
+            console.log(err);
+         }
+      }
+   };
+
+   useEffect(() => {
+      checkIfLoggedIn();
+   }, []);
+
    return (
       <>
-         <StatusBar
-            backgroundColor={colors.headerTitle}
-            barStyle="dark-content"
-         />
-         <NavigationContainer>
-            <Stack.Navigator
-               screenOptions={{
-                  headerTintColor: colors.headerTitle,
-                  headerStyle: {
-                     backgroundColor: colors.headerBackground,
-                     height: 60,
-                  },
-                  // headerLeft: () => (
-                  //    <TouchableOpacity
-                  //       onPress={() => Props.navigation.goBack()}
-                  //    >
-                  //       <MaterialIcons
-                  //          name="keyboard-arrow-left"
-                  //          size={30}
-                  //          style={{ marginTop: 3, marginRight: 10 }}
-                  //          color={colors.headerTitle}
-                  //       />
-                  //    </TouchableOpacity>
-                  // ),
+         {isLoggedIn == null ? (
+            <View
+               style={{
+                  flex: 1,
+                  alignItems: "center",
+                  justifyContent: "center",
                }}
             >
-               <Stack.Screen
-                  name="Drawer"
-                  component={DrawerStack}
-                  options={{ headerShown: false }}
-                  initialParams={{
-                     Props: true,
-                  }}
+               <Text>Loading...</Text>
+            </View>
+         ) : (
+            <>
+               <StatusBar
+                  backgroundColor={colors.headerTitle}
+                  barStyle="dark-content"
                />
-               <Stack.Screen name="Profile" component={profileScreen} />
-            </Stack.Navigator>
-         </NavigationContainer>
+               <NavigationContainer>
+                  <Stack.Navigator
+                     screenOptions={{
+                        headerTintColor: colors.headerTitle,
+                        headerStyle: {
+                           backgroundColor: colors.headerBackground,
+                           height: 60,
+                        },
+                        // headerLeft: () => (
+                        //    <TouchableOpacity
+                        //       onPress={() => Props.navigation.goBack()}
+                        //    >
+                        //       <MaterialIcons
+                        //          name="keyboard-arrow-left"
+                        //          size={30}
+                        //          style={{ marginTop: 3, marginRight: 10 }}
+                        //          color={colors.headerTitle}
+                        //       />
+                        //    </TouchableOpacity>
+                        // ),
+                     }}
+                  >
+                     {isLoggedIn ? (
+                        <>
+                           <Stack.Screen
+                              name="Drawer"
+                              component={DrawerStack}
+                              options={{ headerShown: false }}
+                              initialParams={{
+                                 Props: true,
+                              }}
+                           />
+                           <Stack.Screen
+                              name="Launch"
+                              component={LoginScreen}
+                              options={{ headerShown: false }}
+                           />
+                           <Stack.Screen
+                              name="Profile"
+                              component={profileScreen}
+                           />
+                        </>
+                     ) : (
+                        <>
+                           <Stack.Screen
+                              name="Launch"
+                              component={LoginScreen}
+                              options={{ headerShown: false }}
+                           />
+                           <Stack.Screen
+                              name="Drawer"
+                              component={DrawerStack}
+                              options={{ headerShown: false }}
+                              initialParams={{
+                                 Props: true,
+                              }}
+                           />
+                           <Stack.Screen
+                              name="Profile"
+                              component={profileScreen}
+                           />
+                        </>
+                     )}
+                  </Stack.Navigator>
+               </NavigationContainer>
+            </>
+         )}
       </>
    );
 }

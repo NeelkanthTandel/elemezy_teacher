@@ -23,7 +23,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "com.neelkanthtandel.elemezy_teacher"
     },
     "web": {
       "favicon": "./assets/favicon.png"

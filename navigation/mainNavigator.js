@@ -21,7 +21,6 @@ import {
 
 import { AUTH_API_URL } from "../keys";
 import colors from "../theme/color";
-import classes from "../screens/classesScreen";
 import dashboardScreen from "../screens/dashboardScreen";
 import calendarScreen from "../screens/calendarsScreen";
 import leaveRequestsScreen from "../screens/leaveRequestsScreen";

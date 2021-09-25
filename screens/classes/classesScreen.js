@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-import colors from "../theme/color";
+import colors from "../../theme/color";
 import { MaterialIcons } from "@expo/vector-icons";
 
 const TabContainer = (props) => {

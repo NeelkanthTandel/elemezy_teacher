@@ -23,15 +23,15 @@ import { AUTH_API_URL } from "../keys";
 import colors from "../theme/color";
 import dashboardScreen from "../screens/dashboardScreen";
 import calendarScreen from "../screens/calendarsScreen";
-import leaveRequestsScreen from "../screens/leaveRequestsScreen";
-import classesScreen from "../screens/classesScreen";
+import leaveRequestsScreen from "../screens/classes/leaveRequestsScreen";
+import classesScreen from "../screens/classes/classesScreen";
 import supportScreen from "../screens/supportScreen";
 import chatHomeScreen from "../screens/chat";
 import profileScreen from "../screens/profileScreen";
-import notesScreen from "../screens/notesScreen";
-import assignmentScreen from "../screens/assignmentScreen";
-import documentScreen from "../screens/documentScreen";
-import eventHome from "../screens/Exam/index";
+import notesScreen from "../screens/classes/notesScreen";
+import assignmentScreen from "../screens/classes/assignmentScreen";
+import documentScreen from "../screens/classes/documentScreen";
+import examHome from "../screens/Exam/index";
 import newExamScreen from "../screens/Exam/newExamScreen";
 import viewExamScreen from "../screens/Exam/viewExamScreen";
 import successScreen from "../screens/Exam/successScreen";
@@ -70,7 +70,7 @@ const examStack = () => {
       <Stack.Navigator
          screenOptions={{ headerShown: false, animation: "slide_from_right" }}
       >
-         <Stack.Screen name="home" component={eventHome} />
+         <Stack.Screen name="home" component={examHome} />
          <Stack.Screen name="success" component={successScreen} />
          <Stack.Screen name="newExam" component={newExamScreen} />
          <Stack.Screen name="viewExam" component={viewExamScreen} />
@@ -201,16 +201,28 @@ const DrawerStack = (props) => {
                </TouchableOpacity>
             ),
             headerRight: () => (
-               <TouchableOpacity
-                  onPress={() => props.navigation.navigate("Profile")}
-               >
-                  <Ionicons
-                     name="ios-person-circle"
-                     size={30}
-                     color={colors.headerTitle}
-                     style={{ marginTop: 3, marginHorizontal: 15 }}
-                  />
-               </TouchableOpacity>
+               <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <TouchableOpacity
+                     onPress={() => props.navigation.navigate("Notification")}
+                  >
+                     <Ionicons
+                        name="notifications"
+                        size={28}
+                        color={colors.headerTitle}
+                        style={{ marginTop: 3, marginRight: 15 }}
+                     />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                     onPress={() => props.navigation.navigate("Profile")}
+                  >
+                     <Ionicons
+                        name="ios-person-circle"
+                        size={30}
+                        color={colors.headerTitle}
+                        style={{ marginTop: 3, marginRight: 15 }}
+                     />
+                  </TouchableOpacity>
+               </View>
             ),
          }}
          drawerContent={(props) => {
@@ -251,7 +263,7 @@ const DrawerStack = (props) => {
             name="Dashboard"
             component={dashboardScreen}
             options={{
-               drawerLabel: "Home",
+               drawerLabel: "Dashboard",
                title: "",
                drawerIcon: () => (
                   <MaterialIcons

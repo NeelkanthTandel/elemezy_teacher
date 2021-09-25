@@ -12,8 +12,8 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import * as DocumentPicker from "expo-document-picker";
 
-import colors from "../theme/color";
-import DatePickerButton from "../components/DatePickerButton";
+import colors from "../../theme/color";
+import DatePickerButton from "../../components/DatePickerButton";
 
 const DocumentContainer = (props) => {
    return (

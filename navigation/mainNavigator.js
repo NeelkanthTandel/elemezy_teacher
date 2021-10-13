@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Text, View } from "react-native";
+import { Text, View, Image } from "react-native";
 import { StatusBar, TouchableOpacity } from "react-native";
 import { NavigationContainer, StackActions } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -49,6 +49,7 @@ import viewMeetingScreen from "../screens/Meeting/viewMeetingScreen";
 import attendanceHomeScreen from "../screens/Attendance";
 import addAttendanceScreen from "../screens/Attendance/addAttendance";
 import viewAttendanceScreen from "../screens/Attendance/viewAttendance";
+import notificationSceen from "../screens/notificationScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -228,34 +229,50 @@ const DrawerStack = (props) => {
          drawerContent={(props) => {
             toggleDrawer = props.navigation.toggleDrawer;
             return (
-               <DrawerContentScrollView {...props}>
-                  <DrawerItemList {...props} />
-                  <DrawerItem
-                     label={() => (
-                        <View
-                           style={{
-                              flexDirection: "row",
-                              alignItems: "center",
-                           }}
-                        >
-                           <Ionicons
-                              name="log-out"
-                              size={23}
-                              color={colors.headerTitle}
-                           />
-                           <Text
+               <>
+                  <View
+                     style={{
+                        marginTop: -20,
+                        marginBottom: 20,
+                        // marginLeft: 15,
+                        alignItems: "flex-start",
+                     }}
+                  >
+                     <Image
+                        source={require("../assets/Images/ELfulllogo.png")}
+                        style={{ width: 150, height: 50 }}
+                        resizeMode={"contain"}
+                     />
+                  </View>
+                  <DrawerContentScrollView {...props}>
+                     <DrawerItemList {...props} />
+                     <DrawerItem
+                        label={() => (
+                           <View
                               style={{
-                                 color: colors.headerTitle,
-                                 marginLeft: 30,
+                                 flexDirection: "row",
+                                 alignItems: "center",
                               }}
                            >
-                              Log Out
-                           </Text>
-                        </View>
-                     )}
-                     onPress={logoutHandler}
-                  />
-               </DrawerContentScrollView>
+                              <Ionicons
+                                 name="log-out"
+                                 size={23}
+                                 color={colors.headerTitle}
+                              />
+                              <Text
+                                 style={{
+                                    color: colors.headerTitle,
+                                    marginLeft: 30,
+                                 }}
+                              >
+                                 Log Out
+                              </Text>
+                           </View>
+                        )}
+                        onPress={logoutHandler}
+                     />
+                  </DrawerContentScrollView>
+               </>
             );
          }}
       >
@@ -506,6 +523,10 @@ export default function MainNavigator(Props) {
                               name="Profile"
                               component={profileScreen}
                            />
+                           <Stack.Screen
+                              name="Notification"
+                              component={notificationSceen}
+                           />
                         </>
                      ) : (
                         <>
@@ -525,6 +546,10 @@ export default function MainNavigator(Props) {
                            <Stack.Screen
                               name="Profile"
                               component={profileScreen}
+                           />
+                           <Stack.Screen
+                              name="Notification"
+                              component={notificationSceen}
                            />
                         </>
                      )}

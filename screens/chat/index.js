@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, FlatList } from "react-native";
 import { SearchBar } from "react-native-elements";
+import { useSelector, useDispatch } from "react-redux";
 
 import colors from "../../theme/color";
+import { API_URL } from "../../keys";
+import noTokenHandler from "../../noTokenHandler";
 
 const ChatContainer = (props) => {
    return (
@@ -56,6 +59,14 @@ const ChatContainer = (props) => {
 
 const index = (props) => {
    const [search, setSearch] = useState("");
+   const [isSearching, setIsSearching] = useState(false);
+   const token = useSelector((state) => state.users.token);
+   const CSRF = useSelector((state) => state.users.CSRF);
+
+   if (!token || !CSRF) {
+      noTokenHandler(props);
+   }
+
    const chats = [
       {
          name: "Neelkanth",
@@ -134,6 +145,38 @@ const index = (props) => {
       setFilteredChats(filteredData);
    };
 
+   const fetchContact = async () => {
+      // const csrf = await getCSRFToken(props.route.params.token);
+      // console.log(props.route.params.token);
+
+      console.log("csrf: ", CSRF);
+
+      try {
+         const response = await fetch(`${API_URL}/teacher_contacts`, {
+            method: "POST",
+            headers: {
+               "Content-Type": "application/json",
+               Authorization: "Token " + token,
+               "X-CSRFToken": CSRF,
+            },
+            body: JSON.stringify({
+               institution_id: "RISK123",
+            }),
+         });
+         // const data = await response.json();
+         console.log(
+            "fetched Contacts: ",
+            JSON.parse(JSON.stringify(response))
+         );
+      } catch (err) {
+         console.log("fetch contacts:", err);
+      }
+   };
+
+   useEffect(() => {
+      fetchContact();
+   }, []);
+
    return (
       <View
          style={{
@@ -143,19 +186,24 @@ const index = (props) => {
             flex: 1,
          }}
       >
-         <Text
-            style={{
-               fontSize: 24,
-               fontWeight: "700",
-               lineHeight: 24,
-               color: colors.textPrimary,
-               marginBottom: 15,
-            }}
-         >
-            Chats
-         </Text>
+         {isSearching ? null : (
+            <Text
+               style={{
+                  fontSize: 24,
+                  fontWeight: "700",
+                  lineHeight: 24,
+                  color: colors.textPrimary,
+                  marginBottom: 15,
+               }}
+            >
+               Chats
+            </Text>
+         )}
          <SearchBar
             placeholder="Search"
+            onFocus={() => setIsSearching(true)}
+            onBlur={() => setIsSearching(false)}
+            on
             onChangeText={(val) => {
                setSearch(val);
                handleSearch(val);

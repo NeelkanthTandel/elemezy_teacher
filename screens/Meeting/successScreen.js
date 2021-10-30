@@ -43,7 +43,7 @@ const successScreen = (props) => {
                   marginBottom: 20,
                }}
             >
-               Your examination has been scheduled
+               Your meeting has been scheduled
             </Text>
             <TouchableOpacity>
                <Text

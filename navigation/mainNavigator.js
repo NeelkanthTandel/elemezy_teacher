@@ -18,6 +18,7 @@ import {
    Entypo,
    Octicons,
 } from "@expo/vector-icons";
+import { useSelector, useDispatch } from "react-redux";
 
 import { AUTH_API_URL } from "../keys";
 import colors from "../theme/color";
@@ -46,6 +47,7 @@ import chatScreen from "../screens/chat/chatScreen";
 import meetingHomeScreen from "../screens/Meeting";
 import newMeetingScreen from "../screens/Meeting/newMeetingScreen";
 import viewMeetingScreen from "../screens/Meeting/viewMeetingScreen";
+import meetingSuccessScreen from "../screens/Meeting/successScreen";
 import attendanceHomeScreen from "../screens/Attendance";
 import addAttendanceScreen from "../screens/Attendance/addAttendance";
 import viewAttendanceScreen from "../screens/Attendance/viewAttendance";
@@ -110,6 +112,7 @@ const meetingStack = () => {
          <Stack.Screen name="home" component={meetingHomeScreen} />
          <Stack.Screen name="newMeeting" component={newMeetingScreen} />
          <Stack.Screen name="viewMeeting" component={viewMeetingScreen} />
+         <Stack.Screen name="success" component={meetingSuccessScreen} />
       </Stack.Navigator>
    );
 };
@@ -126,7 +129,7 @@ const attendanceStack = () => {
    );
 };
 
-const chatStack = () => {
+const chatStack = (props) => {
    return (
       <Stack.Navigator
          screenOptions={{ headerShown: false, animation: "slide_from_right" }}
@@ -143,8 +146,11 @@ const DrawerStack = (props) => {
    const [loading, setLoading] = useState(false);
    let toggleDrawer;
 
+   const token = useSelector((state) => state.users.token);
+
+   const dispatch = useDispatch();
+
    const logoutHandler = async () => {
-      const token = await AsyncStorage.getItem("token");
       try {
          const response = await fetch(`${AUTH_API_URL}/logout`, {
             method: "POST",
@@ -155,6 +161,7 @@ const DrawerStack = (props) => {
          });
          // const data = await response.json();
          console.log("logout");
+         dispatch(setToken(""));
          await AsyncStorage.removeItem("token");
          props.navigation.dispatch(StackActions.replace("Launch"));
       } catch (err) {
@@ -428,12 +435,32 @@ const DrawerStack = (props) => {
    );
 };
 
+import {
+   setToken,
+   setCSRF,
+   setName,
+   setEmail,
+   setClassIdList,
+} from "../store/actions/user";
+import getCSRFToken from "../getCSRFToken";
+
 export default function MainNavigator(Props) {
    const [isLoggedIn, setIsLoggedIn] = useState(null);
    const [data, setData] = useState({});
+   const token = useSelector((state) => state.users.token);
+   // console.log("Reducer Token: ", token);
+
+   // const selector = useSelector();
+
+   // const getToken = () => {
+   //    return useSelector((state) => state.users.token);
+   // };
+
+   const dispatch = useDispatch();
    const checkIfLoggedIn = async () => {
       const token = await AsyncStorage.getItem("token");
-      console.log("token: ", token);
+      dispatch(setToken(token));
+      // console.log("token: ", token);
       if (!token || token == "") {
          console.log("No token => In main navigator");
          return setIsLoggedIn(false);
@@ -447,10 +474,19 @@ export default function MainNavigator(Props) {
                },
             });
             const data = await response.json();
-            console.log(data);
+            console.log("main navigator:", token);
             if (data.email) {
-               setData(data);
-               setIsLoggedIn(true);
+               const csrf = await getCSRFToken(token);
+               if (csrf) {
+                  dispatch(setCSRF(csrf));
+                  dispatch(setName(data.firstname + " " + data.lastname));
+                  dispatch(setEmail(data.email));
+                  dispatch(setClassIdList(JSON.parse(data.class_id_list)));
+                  setData(data);
+                  setIsLoggedIn(true);
+               } else {
+                  setIsLoggedIn(false);
+               }
             } else {
                setIsLoggedIn(false);
             }

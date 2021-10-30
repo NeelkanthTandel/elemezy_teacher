@@ -3,16 +3,28 @@ import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { StackActions } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useDispatch } from "react-redux";
 
 import colors from "../theme/color";
 import { AUTH_API_URL } from "../keys";
+import {
+   setCSRF,
+   setToken,
+   setEmail,
+   setName,
+   setClassIdList,
+} from "../store/actions/user";
+import getCSRFToken from "../global/getCSRFToken";
 
 const LoginScreen = (props) => {
    const [isPassVisible, setIsPassVisible] = useState(false);
-   const [email, setEmail] = useState("");
+   const [email, setEmailId] = useState("");
    const [password, setPassword] = useState("");
    const [loading, setLoading] = useState(false);
+
+   const dispatch = useDispatch();
    // console.log(props.props);
+
    const sendLoginData = async () => {
       try {
          const response = await fetch(`${AUTH_API_URL}/login`, {
@@ -26,7 +38,7 @@ const LoginScreen = (props) => {
             }),
          });
          const data = await response.json();
-         console.log(data.token != "");
+         // console.log(data);
          if (
             data.non_field_errors &&
             data.non_field_errors[0] == "Incorrect Credentials"
@@ -36,7 +48,29 @@ const LoginScreen = (props) => {
          } else if (data.token != "") {
             console.log(data.token);
             AsyncStorage.setItem("token", data.token);
+            dispatch(setToken(data.token));
+
+            const csrf = await getCSRFToken(data.token);
+            console.log(csrf);
+            if (csrf) {
+               dispatch(setCSRF(csrf));
+            } else {
+               Alert.alert("Error", "Something went wrong");
+               return setLoading(false);
+            }
+
             if (data.user.is_teacher) {
+               // console.log(
+               //    typeof (data.user.firstname + " " + data.user.lastname)
+               // );
+               // console.log(typeof data.user.email);
+               // console.log(typeof JSON.parse(data.user.class_id_list));
+               dispatch(
+                  setName(data.user.firstname + " " + data.user.lastname)
+               );
+               dispatch(setEmail(data.user.email));
+               dispatch(setClassIdList(JSON.parse(data.user.class_id_list)));
+
                return props.navigation.dispatch(
                   StackActions.replace("Drawer", {})
                );
@@ -106,7 +140,7 @@ const LoginScreen = (props) => {
                         paddingHorizontal: 10,
                         marginVertical: 8,
                      }}
-                     onChangeText={(val) => setEmail(val)}
+                     onChangeText={(val) => setEmailId(val)}
                   />
                </View>
                <View

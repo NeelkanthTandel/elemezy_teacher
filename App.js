@@ -1,6 +1,14 @@
 import React, { useEffect } from "react";
 import { View, Image, Button } from "react-native";
 import MainNavigator from "./navigation/mainNavigator";
+import { enableScreens } from "react-native-screens";
+import { createStore, combineReducers } from "redux";
+import { Provider } from "react-redux";
+import User from "./store/reducers/user";
+// import { setToken } from "./store/actions/user";
+// import { useSelector, useDispatch } from "react-redux";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
+
 // import * as Notification from "expo-notifications";
 
 // Notification.setNotificationHandler({
@@ -11,8 +19,20 @@ import MainNavigator from "./navigation/mainNavigator";
 //       };
 //    },
 // });
+
+enableScreens(true);
+
+const rootReducer = combineReducers({
+   users: User,
+});
+const store = createStore(rootReducer);
+
 export default function App() {
-   return <MainNavigator />;
+   return (
+      <Provider store={store}>
+         <MainNavigator />
+      </Provider>
+   );
    // const toggleNotificationHandler = async () => {
    //    // Notification.scheduleNotificationAsync({
    //    //    content: {

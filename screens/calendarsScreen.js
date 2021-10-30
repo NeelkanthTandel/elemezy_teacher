@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { Calendar, CalendarList, Agenda } from "react-native-calendars";
 import colors from "../theme/color";
+import { useSelector } from "react-redux";
 
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
+import { API_URL } from "../keys";
 
 const EventsLabel = (props) => {
    return (
@@ -114,6 +116,32 @@ const UpExamContainer = (props) => {
 };
 
 const CalendarScreen = (props) => {
+   const token = useSelector((state) => state.users.token);
+   const CSRF = useSelector((state) => state.users.CSRF);
+
+   console.log("c", CSRF);
+
+   const fetchEvents = async () => {
+      try {
+         const response = await fetch(`${API_URL}/api/events/`, {
+            method: "GET",
+            headers: {
+               "Content-Type": "application/json",
+               Authorization: "Token " + token,
+               "X-CSRFToken": CSRF,
+            },
+         });
+         const data = await response.json();
+         console.log("events:", data);
+      } catch (err) {
+         console.log("csrf: ", err);
+      }
+   };
+
+   useEffect(() => {
+      fetchEvents();
+   }, []);
+
    return (
       <ScrollView
          showsVerticalScrollIndicator={false}

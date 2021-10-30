@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
    StyleSheet,
    View,
@@ -10,12 +10,15 @@ import {
 import { MaterialIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
-import * as DocumentPicker from "expo-document-picker";
+import { useSelector } from "react-redux";
+import axios from "axios";
 
 import colors from "../../theme/color";
 import DatePickerButton from "../../components/DatePickerButton";
+import { API_URL } from "../../keys";
 
 const newMeetingScreen = (props) => {
+   const email = useSelector((state) => state.users.email);
    const [date, setDate] = useState(new Date());
    const [startDate, setStartDate] = useState(new Date());
    const [endDate, setEndDate] = useState(new Date());
@@ -24,11 +27,39 @@ const newMeetingScreen = (props) => {
    const [show, setShow] = useState(false);
    const [classroom, setClassroom] = useState("");
    const [subject, setSubject] = useState("");
+   const [link, setLink] = useState("");
+   const [classId, setClassId] = useState();
+   const class_id_list = useSelector((state) => state.users.class_id_list);
+   const token = useSelector((state) => state.users.token);
+   const CSRF = useSelector((state) => state.users.CSRF);
+
+   useEffect(() => {
+      Object.keys(class_id_list[0].RISK1234SEM1.classes).map((key) =>
+         setClassId((obj) =>
+            obj
+               ? [
+                    ...obj,
+                    {
+                       id: key,
+                       name: class_id_list[0].RISK1234SEM1.classes[key]
+                          .class_name,
+                    },
+                 ]
+               : [
+                    {
+                       id: key,
+                       name: class_id_list[0].RISK1234SEM1.classes[key]
+                          .class_name,
+                    },
+                 ]
+         )
+      );
+   }, []);
 
    const formatedDate =
       (date.getDate() < 10 ? "0" + date.getDate() : date.getDate()) +
       "-" +
-      (date.getMonth() < 10
+      (date.getMonth() < 9
          ? "0" + (date.getMonth() + 1)
          : date.getMonth() + 1) +
       "-" +
@@ -40,20 +71,24 @@ const newMeetingScreen = (props) => {
             ? "0" + (startDate.getHours() - 12)
             : startDate.getHours() - 12
          : startDate.getHours() < 10
-         ? "0" + startDate.getHours()
+         ? startDate.getHours() == 0
+            ? "12"
+            : "0" + startDate.getHours()
          : startDate.getHours()) +
       ":" +
       (startDate.getMinutes() < 10
          ? "0" + startDate.getMinutes()
          : startDate.getMinutes()) +
-      (startDate.getHours() > 12 ? " PM" : " AM");
+      (startDate.getHours() >= 12 ? " PM" : " AM");
    let endTime =
       (endDate.getHours() > 12
          ? endDate.getHours() - 12 < 10
             ? "0" + (endDate.getHours() - 12)
             : endDate.getHours() - 12
          : endDate.getHours() < 10
-         ? "0" + endDate.getHours()
+         ? endDate.getHours() == 0
+            ? "12"
+            : "0" + endDate.getHours()
          : endDate.getHours()) +
       ":" +
       (endDate.getMinutes() < 10
@@ -86,6 +121,44 @@ const newMeetingScreen = (props) => {
          setType(timeType);
       }
    };
+
+   const api = axios.create({
+      baseURL: API_URL,
+      headers: {
+         "Content-Type": "application/json",
+         Authorization: "Token " + token,
+         "X-CSRFToken": CSRF,
+      },
+      validateStatus: (status) => {
+         return true;
+      },
+   });
+
+   // const scheduleMeetingHandler = async () => {
+   //    try {
+   //       const response = await fetch(`${API_URL}/create_meet_link`, {
+   //          method: "POST",
+   //          headers: {
+   //             "Content-Type": "application/json",
+   //             Authorization: "Token " + token,
+   //             "X-Requested-With": "XMLHttpRequest",
+   //             "X-CSRFToken": CSRF,
+   //          },
+   //          body: JSON.stringify({
+   //             teacher_id: email,
+   //             class_id: classroom,
+   //             time_start: startTime,
+   //             meet_link: link,
+   //             time_end: endTime,
+   //          }),
+   //       });
+
+   //       console.log("done:", JSON.parse(JSON.stringify(response)));
+   //    } catch (err) {
+   //       console.log("schedule meeting error: ", err);
+   //    }
+   // };
+
    return (
       <ScrollView
          style={{ backgroundColor: colors.backgroundColor }}
@@ -148,7 +221,7 @@ const newMeetingScreen = (props) => {
                      color: colors.textPrimary,
                   }}
                >
-                  Select Classroom and Subject
+                  Select Classroom
                </Text>
                <View
                   style={{
@@ -163,16 +236,16 @@ const newMeetingScreen = (props) => {
                         borderWidth: 0.5,
                         borderColor: colors.textSecondary,
                         paddingVertical: 2,
-                        width: "48%",
+                        width: "100%",
 
                         borderRadius: 5,
                      }}
                   >
                      <Picker
                         selectedValue={classroom}
-                        onValueChange={(itemValue, itemIndex) =>
-                           setClassroom(itemValue)
-                        }
+                        onValueChange={(itemValue, itemIndex) => {
+                           setClassroom(itemValue);
+                        }}
                         style={{
                            color: colors.textPrimary,
                            flex: 1,
@@ -182,11 +255,18 @@ const newMeetingScreen = (props) => {
                         dropdownIconColor="grey"
                      >
                         <Picker.Item label="Classroom" value="Classroom" />
-                        <Picker.Item label="9A" value="9A" />
-                        <Picker.Item label="9B" value="9B" />
+                        {classId?.map((ele) => {
+                           return (
+                              <Picker.Item
+                                 label={ele.name}
+                                 value={ele.id}
+                                 key={ele.id}
+                              />
+                           );
+                        })}
                      </Picker>
                   </View>
-                  <View
+                  {/* <View
                      style={{
                         borderWidth: 0.5,
                         borderColor: colors.textSecondary,
@@ -213,7 +293,7 @@ const newMeetingScreen = (props) => {
                         <Picker.Item label="Hindi" value="Hindi" />
                         <Picker.Item label="Science" value="Science" />
                      </Picker>
-                  </View>
+                  </View> */}
                </View>
                <View
                   style={{
@@ -317,6 +397,7 @@ const newMeetingScreen = (props) => {
             <View style={{ width: "100%", marginVertical: 30 }}>
                <TextInput
                   placeholder="Paste meeting link here"
+                  onChangeText={(val) => setLink(val)}
                   style={{
                      width: "100%",
                      borderWidth: 1,
@@ -328,7 +409,7 @@ const newMeetingScreen = (props) => {
                />
             </View>
 
-            <View>
+            {/* <View>
                <Text
                   style={{
                      color: colors.textPrimary,
@@ -350,7 +431,7 @@ const newMeetingScreen = (props) => {
                >
                   <Text>No clash with other meetings</Text>
                </View>
-            </View>
+            </View> */}
 
             <TouchableOpacity
                style={{
@@ -361,7 +442,7 @@ const newMeetingScreen = (props) => {
                   marginVertical: 10,
                   borderRadius: 5,
                }}
-               onPress={() => props.navigation.navigate("success")}
+               // onPress={scheduleMeetingHandler}
             >
                <Text
                   style={{

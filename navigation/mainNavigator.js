@@ -448,13 +448,6 @@ export default function MainNavigator(Props) {
    const [isLoggedIn, setIsLoggedIn] = useState(null);
    const [data, setData] = useState({});
    const token = useSelector((state) => state.users.token);
-   // console.log("Reducer Token: ", token);
-
-   // const selector = useSelector();
-
-   // const getToken = () => {
-   //    return useSelector((state) => state.users.token);
-   // };
 
    const dispatch = useDispatch();
    const checkIfLoggedIn = async () => {
@@ -503,6 +496,7 @@ export default function MainNavigator(Props) {
    return (
       <>
          {isLoggedIn == null ? (
+            // Executed when authentication is in process
             <View
                style={{
                   flex: 1,
@@ -526,21 +520,10 @@ export default function MainNavigator(Props) {
                            backgroundColor: colors.headerBackground,
                            height: 60,
                         },
-                        // headerLeft: () => (
-                        //    <TouchableOpacity
-                        //       onPress={() => Props.navigation.goBack()}
-                        //    >
-                        //       <MaterialIcons
-                        //          name="keyboard-arrow-left"
-                        //          size={30}
-                        //          style={{ marginTop: 3, marginRight: 10 }}
-                        //          color={colors.headerTitle}
-                        //       />
-                        //    </TouchableOpacity>
-                        // ),
                      }}
                   >
                      {isLoggedIn ? (
+                        // Executed if user exist (if we get valid token)
                         <>
                            <Stack.Screen
                               name="Drawer"
@@ -565,6 +548,7 @@ export default function MainNavigator(Props) {
                            />
                         </>
                      ) : (
+                        //Executed when there is no valid token
                         <>
                            <Stack.Screen
                               name="Launch"

@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
+import {
+   View,
+   Text,
+   TextInput,
+   TouchableOpacity,
+   Alert,
+   StyleSheet,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { StackActions } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -15,6 +22,7 @@ import {
    setClassIdList,
 } from "../store/actions/user";
 import getCSRFToken from "../global/getCSRFToken";
+import { globalStyles } from "../constant/globalStyles";
 
 const LoginScreen = (props) => {
    const [isPassVisible, setIsPassVisible] = useState(false);
@@ -102,33 +110,9 @@ const LoginScreen = (props) => {
    };
 
    return (
-      <View
-         style={{
-            flex: 1,
-            backgroundColor: colors.backgroundColor,
-            alignItems: "center",
-            paddingHorizontal: 40,
-            justifyContent: "center",
-         }}
-      >
-         <View
-            style={{
-               flex: 1,
-               width: "100%",
-               alignItems: "center",
-               justifyContent: "center",
-            }}
-         >
-            <Text
-               style={{
-                  marginBottom: "20%",
-                  color: colors.textPrimary,
-                  fontSize: 30,
-                  fontWeight: "bold",
-               }}
-            >
-               Sign In
-            </Text>
+      <View style={styles.container}>
+         <View style={styles.signInContainer}>
+            <Text style={styles.signInText}>Sign In</Text>
             <View style={{ width: "100%" }}>
                <View>
                   <TextInput
@@ -209,6 +193,9 @@ const LoginScreen = (props) => {
                </Text>
             </TouchableOpacity>
          </View>
+
+         {/* -----------Toggle between sign in and sign up page */}
+
          {/* <View style={{ marginVertical: 20, flexDirection: "row" }}>
             <Text style={{ color: colors.textSecondary, fontSize: 16 }}>
                Don't have an account?{" "}
@@ -228,5 +215,27 @@ const LoginScreen = (props) => {
       </View>
    );
 };
+
+const styles = StyleSheet.create({
+   container: {
+      flex: 1,
+      backgroundColor: colors.backgroundColor,
+      alignItems: "center",
+      paddingHorizontal: 40,
+      justifyContent: "center",
+   },
+   signInContainer: {
+      flex: 1,
+      width: "100%",
+      alignItems: "center",
+      justifyContent: "center",
+   },
+   signInText: {
+      marginBottom: "20%",
+      color: colors.textPrimary,
+      fontSize: 30,
+      fontWeight: "bold",
+   },
+});
 
 export default LoginScreen;

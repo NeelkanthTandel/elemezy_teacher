@@ -1,3 +1,5 @@
+//Api is integrated for chat section in student app
+
 import React from "react";
 import {
    StyleSheet,

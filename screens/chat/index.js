@@ -5,7 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 
 import colors from "../../theme/color";
 import { API_URL } from "../../keys";
-import noTokenHandler from "../../noTokenHandler";
+import noTokenHandler from "../../global/noTokenHandler";
 
 const ChatContainer = (props) => {
    return (
@@ -145,37 +145,39 @@ const index = (props) => {
       setFilteredChats(filteredData);
    };
 
-   const fetchContact = async () => {
-      // const csrf = await getCSRFToken(props.route.params.token);
-      // console.log(props.route.params.token);
+   //-----This api call is not working so I have commented this
 
-      console.log("csrf: ", CSRF);
+   // const fetchContact = async () => {
+   //    // const csrf = await getCSRFToken(props.route.params.token);
+   //    // console.log(props.route.params.token);
 
-      try {
-         const response = await fetch(`${API_URL}/teacher_contacts`, {
-            method: "POST",
-            headers: {
-               "Content-Type": "application/json",
-               Authorization: "Token " + token,
-               "X-CSRFToken": CSRF,
-            },
-            body: JSON.stringify({
-               institution_id: "RISK123",
-            }),
-         });
-         // const data = await response.json();
-         console.log(
-            "fetched Contacts: ",
-            JSON.parse(JSON.stringify(response))
-         );
-      } catch (err) {
-         console.log("fetch contacts:", err);
-      }
-   };
+   //    console.log("csrf: ", CSRF);
 
-   useEffect(() => {
-      fetchContact();
-   }, []);
+   //    try {
+   //       const response = await fetch(`${API_URL}/teacher_contacts`, {
+   //          method: "POST",
+   //          headers: {
+   //             "Content-Type": "application/json",
+   //             Authorization: "Token " + token,
+   //             "X-CSRFToken": CSRF,
+   //          },
+   //          body: JSON.stringify({
+   //             institution_id: "RISK123",
+   //          }),
+   //       });
+   //       // const data = await response.json();
+   //       console.log(
+   //          "fetched Contacts: ",
+   //          JSON.parse(JSON.stringify(response))
+   //       );
+   //    } catch (err) {
+   //       console.log("fetch contacts:", err);
+   //    }
+   // };
+
+   // useEffect(() => {
+   //    fetchContact();
+   // }, []);
 
    return (
       <View

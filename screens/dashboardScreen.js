@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, ScrollView, StyleSheet } from "react-native";
 import {
    Ionicons,
    Octicons,
@@ -66,45 +66,11 @@ const dashboardScreen = (props) => {
          }}
          showsVerticalScrollIndicator={false}
       >
-         <View
-            style={{
-               flex: 1,
-               alignItems: "center",
-               paddingHorizontal: 20,
-               marginBottom: 30,
-            }}
-         >
-            <Text
-               style={{
-                  fontSize: 24,
-                  fontWeight: "700",
-                  lineHeight: 24,
-                  color: colors.textPrimary,
-                  marginVertical: 30,
-                  marginBottom: 60,
-               }}
-            >
-               Dashboard
-            </Text>
-            <View
-               style={{
-                  width: "100%",
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: 15,
-               }}
-            >
+         <View style={styles.container}>
+            <Text style={styles.titleText}>Dashboard</Text>
+            <View style={styles.ttHeader}>
                <View>
-                  <Text
-                     style={{
-                        fontSize: 18,
-                        fontWeight: "700",
-                        color: colors.textPrimary,
-                     }}
-                  >
-                     Today's Timetable
-                  </Text>
+                  <Text style={styles.ttText}>Today's Timetable</Text>
                   <Text style={{ fontSize: 10, color: colors.textSecondary }}>
                      Saturday, 11 September 2021
                   </Text>
@@ -284,5 +250,34 @@ const dashboardScreen = (props) => {
       </ScrollView>
    );
 };
+
+const styles = StyleSheet.create({
+   container: {
+      flex: 1,
+      alignItems: "center",
+      paddingHorizontal: 20,
+      marginBottom: 30,
+   },
+   titleText: {
+      fontSize: 24,
+      fontWeight: "700",
+      lineHeight: 24,
+      color: colors.textPrimary,
+      marginVertical: 30,
+      marginBottom: 60,
+   },
+   ttHeader: {
+      width: "100%",
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 15,
+   },
+   ttText: {
+      fontSize: 18,
+      fontWeight: "700",
+      color: colors.textPrimary,
+   },
+});
 
 export default dashboardScreen;

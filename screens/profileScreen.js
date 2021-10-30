@@ -6,7 +6,7 @@ import {
    Text,
    Image,
    TextInput,
-   TouchableOpacity,
+   StyleSheet,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 
@@ -19,23 +19,7 @@ const Container = (props) => {
    // const CustomText = props.isEditing ? TextInput : Text;
    console.log(props.isEditing);
    return (
-      <View
-         style={{
-            width: "100%",
-            flexDirection: "row",
-            alignItems: "center",
-            marginVertical: 15,
-            borderRadius: 10,
-            elevation: 3,
-            shadowColor: "black",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.26,
-            shadowRadius: 10,
-            backgroundColor: "white",
-            paddingVertical: 13,
-            paddingHorizontal: 15,
-         }}
-      >
+      <View style={styles.inputContainer}>
          <View style={{ width: "30%", minWidth: 50 }}>
             <Text style={{ color: colors.textSecondary }}>{props.type}</Text>
          </View>
@@ -108,14 +92,7 @@ const profileScreen = (props) => {
                style={{ backgroundColor: colors.backgroundColor }}
                showsVerticalScrollIndicator={false}
             >
-               <View
-                  style={{
-                     flex: 1,
-                     paddingHorizontal: 20,
-                     paddingVertical: 30,
-                     alignItems: "center",
-                  }}
-               >
+               <View style={styles.container}>
                   <Image
                      source={{ uri: "https://picsum.photos/100" }}
                      style={{
@@ -182,5 +159,29 @@ const profileScreen = (props) => {
       </>
    );
 };
+
+const styles = StyleSheet.create({
+   inputContainer: {
+      width: "100%",
+      flexDirection: "row",
+      alignItems: "center",
+      marginVertical: 15,
+      borderRadius: 10,
+      elevation: 3,
+      shadowColor: "black",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.26,
+      shadowRadius: 10,
+      backgroundColor: "white",
+      paddingVertical: 13,
+      paddingHorizontal: 15,
+   },
+   container: {
+      flex: 1,
+      paddingHorizontal: 20,
+      paddingVertical: 30,
+      alignItems: "center",
+   },
+});
 
 export default profileScreen;
